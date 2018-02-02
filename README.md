@@ -44,4 +44,4 @@ This is a prototype only and is provided "as is", with no warranty or support. U
 
 Copyright © `2018` `Velixo`
 
-This component is licensed under the GPLv3 License, a copy of which is available online at https://github.com/gmichaud/Velixo-Reports/blob/master/LICENSE.md
+This component is licensed under the GPLv3 License, a copy of which is available online at https://github.com/gmichaud/Velixo-AcumaticaCodeEditor/blob/master/LICENSE.md
