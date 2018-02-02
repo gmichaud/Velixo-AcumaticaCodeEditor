@@ -1,36 +1,35 @@
-﻿[![Project Status](http://opensource.box.com/badges/active.svg)](http://opensource.box.com/badges)
-
 Velixo Code Editor for Acumatica
 ================================
-TODO
-OmniSharp link
-Monaco link
+A modern browser-based code editor with IntelliSense support to replace the built-in Acumatica customization code editor. This was originally started as part of a different project which I won't be releasing for now. Based on [Monaco Editor](https://github.com/Microsoft/monaco-editor) and [OmniSharp](https://github.com/OmniSharp).
+
+![Demo](http://g.recordit.co/uBT137T8Cq.gif)
+
+IntelliSense also extends to auto-generated code, like DAC extensions:
+
+![Demo](http://g.recordit.co/zWbciGiA20.gif)
+
+This project demonstrates a few interesting/unusual/undocumented/unsupported customization techniques:
+* The use of Autofac and ActivateOnApplicationStart to execute initialization logic when the site starts
+* Adding a route and a custom HTTP handler to Acumatica (the editor currently send a HTTP POST comm)and to /editor to handle autocompletion, signature help and type lookup requests from the editor - my plan was to switch to web sockets for better performance)
+* Extracting a command-line application embedded inside the library to a temporary path and using standard input/output to communicate with it
 
 ### Prerequisites
 * Acumatica 2017 R2 or later (tested with 17.204.0019 and 17.205.0015)
-* .NET Core SDK
+* [.NET Core SDK 2.1.4 or later](https://www.microsoft.com/net/download/windows)
 
-Quick Start
+Installation
 -----------
-TODO
-
-### Installation
-TODO
-
-### Usage
-TODO
+A complete customization package can be downloaded avaialable from the [releases page](https://github.com/gmichaud/Velixo-AcumaticaCodeEditor/releases)
 
 Support
 -----------
-TODO
+This is a prototype only and is provided "as is", with no warranty or support. Use at your own risk!
 
 Known Issues
 ------------
-TODO
-
-* SM204580.aspx overwritten; lost when unpublishing
-* Initial completion list does not always wait until data is available and returns No results on initial
-* Application restart not detected and could result in stale OmniSharp.exe processes
+* The customization project editor uses an hardcoded URL for the code editor, which means we have to directly overwrite Pages\SM\SM204580.aspx and Pages\SM\SM204580.aspx.cs; when unpublishing this customization, the file gets deleted, rendering the editor unusable. This can be solved by manually copying the originals from the Files directory or running the Update Site process.
+* The first time you trigger auto-complete for a customization project, the server may return with no results; it usually works on the second attempt.
+* The lifetime of OmniSharp.exe is managed by a thread which is supposed to kill the process after 10 minutes of inactivity, however if the application domain is restarted it may remain stale.
 
 ## Copyright and License
 
