@@ -1,6 +1,6 @@
 Velixo Code Editor for Acumatica
 ================================
-A modern browser-based code editor with IntelliSense support to replace the built-in Acumatica customization code editor. This was originally started as part of a different project which I won't be releasing for now. Based on [Monaco Editor](https://github.com/Microsoft/monaco-editor) and [OmniSharp](https://github.com/OmniSharp).
+**Prototype** of a modern browser-based code editor with IntelliSense support to replace the built-in Acumatica customization code editor. This was originally started as part of a different project which I won't be releasing for now. Based on [Monaco Editor](https://github.com/Microsoft/monaco-editor) and [OmniSharp](https://github.com/OmniSharp).
 
 ![Demo](http://g.recordit.co/uBT137T8Cq.gif)
 
@@ -15,7 +15,7 @@ This project demonstrates a few interesting/unusual/undocumented/unsupported cus
 
 ### Prerequisites
 * Acumatica 2017 R2 or later (tested with 17.204.0019 and 17.205.0015)
-* [.NET Core SDK 2.1.4 or later](https://www.microsoft.com/net/download/windows)
+* [.NET Core SDK 2.1.4 or later](https://www.microsoft.com/net/download/windows) must be installed on the server
 
 Installation
 -----------
@@ -24,6 +24,14 @@ A complete customization package can be downloaded avaialable from the [releases
 Support
 -----------
 This is a prototype only and is provided "as is", with no warranty or support. Use at your own risk!
+
+Contributing
+------------
+The project has been a learning exercise for me and I don't have much time to invest in it. If you want to contribute, here are some ideas of what could be improved:
+* Use websockets instead of HTTP POST calls to communicate with the /editor endpoint
+* Remove dependency on .NET Core SDK (or remove dependency on OmniSharp altogether and go straight to Roslyn, like try.dot.net)
+* Add support for more features supported by Monaco and OmniSharp like model markers (the red squiggly line that show up when you have an error in your code), editor commands, etc.
+* Build a REPL (read-evaluate-print-loop) that uses this editor and can be invoked from any screen in Acumatica
 
 Known Issues
 ------------
