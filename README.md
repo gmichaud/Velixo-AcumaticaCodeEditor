@@ -10,7 +10,7 @@ IntelliSense also extends to auto-generated code, like DAC extensions:
 
 This project demonstrates a few interesting/unusual/undocumented/unsupported customization techniques:
 * The use of Autofac and ActivateOnApplicationStart to execute initialization logic when the site starts
-* Adding a route and a custom HTTP handler to Acumatica (the editor currently send a HTTP POST comm)and to /editor to handle autocompletion, signature help and type lookup requests from the editor - my plan was to switch to web sockets for better performance)
+* Adding a route and a custom HTTP handler to Acumatica (the editor currently send a HTTP POST command to /editor to handle autocompletion, signature help and type lookup requests from the editor)
 * Extracting a command-line application embedded inside the library to a temporary path and using standard input/output to communicate with it
 * Using reflection to invoke internal functions
 
@@ -24,7 +24,7 @@ A complete customization package can be downloaded avaialable from the [releases
 
 Support
 -----------
-This is a prototype only and is provided "as is", with no warranty or support. Use at your own risk!
+This is a prototype only and is provided "as is", with no warranty or support. Use at your commown risk!
 
 Contributing
 ------------
