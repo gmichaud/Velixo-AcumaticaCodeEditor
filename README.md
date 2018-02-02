@@ -12,6 +12,7 @@ This project demonstrates a few interesting/unusual/undocumented/unsupported cus
 * The use of Autofac and ActivateOnApplicationStart to execute initialization logic when the site starts
 * Adding a route and a custom HTTP handler to Acumatica (the editor currently send a HTTP POST comm)and to /editor to handle autocompletion, signature help and type lookup requests from the editor - my plan was to switch to web sockets for better performance)
 * Extracting a command-line application embedded inside the library to a temporary path and using standard input/output to communicate with it
+* Using reflection to invoke internal functions
 
 ### Prerequisites
 * Acumatica 2017 R2 or later (tested with 17.204.0019 and 17.205.0015)
