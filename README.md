@@ -22,10 +22,6 @@ Installation
 -----------
 A complete customization package can be downloaded avaialable from the [releases page](https://github.com/gmichaud/Velixo-AcumaticaCodeEditor/releases)
 
-Support
------------
-This is a prototype only and is provided "as is", with no warranty or support. Use at your commown risk!
-
 Contributing
 ------------
 The project has been a learning exercise for me and I don't have much time to invest in it. If you want to contribute, here are some ideas of what could be improved:
@@ -39,6 +35,10 @@ Known Issues
 * The customization project editor uses an hardcoded URL for the code editor, which means we have to directly overwrite Pages\SM\SM204580.aspx and Pages\SM\SM204580.aspx.cs; when unpublishing this customization, the file gets deleted, rendering the editor unusable. This can be solved by manually copying the originals from the Files directory or running the Update Site process.
 * The first time you trigger auto-complete for a customization project, the server may return with no results; it usually works on the second attempt.
 * The lifetime of OmniSharp.exe is managed by a thread which is supposed to kill the process after 10 minutes of inactivity, however if the application domain is restarted it may remain stale.
+
+Support
+-----------
+This is a prototype only and is provided "as is", with no warranty or support. Use at your own risk!
 
 ## Copyright and License
 
