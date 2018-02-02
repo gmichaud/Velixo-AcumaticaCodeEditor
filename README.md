@@ -1,6 +1,6 @@
 Velixo Code Editor for Acumatica
 ================================
-**Prototype** of a modern browser-based code editor with IntelliSense support to replace the built-in Acumatica customization code editor. This was originally started as part of a different project which I won't be releasing for now. Based on [Monaco Editor](https://github.com/Microsoft/monaco-editor) and [OmniSharp](https://github.com/OmniSharp).
+Prototype of a modern browser-based code editor with IntelliSense support to replace the built-in Acumatica customization code editor. This was originally started as part of a different project which I won't be releasing for now. Based on [Monaco Editor](https://github.com/Microsoft/monaco-editor) and [OmniSharp](https://github.com/OmniSharp).
 
 ![Demo](http://g.recordit.co/uBT137T8Cq.gif)
 
