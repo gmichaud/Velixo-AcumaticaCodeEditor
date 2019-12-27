@@ -15,8 +15,8 @@ This project demonstrates a few interesting/unusual/undocumented/unsupported cus
 * Using reflection to invoke internal functions
 
 ### Prerequisites
-* Acumatica 2017 R2 or later (tested with 17.204.0019 and 17.205.0015)
-* [.NET Core SDK 2.1.4 or later](https://www.microsoft.com/net/download/windows) must be installed on the server
+* Acumatica 2019 R2 or later (tested with 19.200.0081)
+* [.NET Core SDK 3.0 or later](https://www.microsoft.com/net/download/windows) must be installed on the server
 
 Installation
 -----------
