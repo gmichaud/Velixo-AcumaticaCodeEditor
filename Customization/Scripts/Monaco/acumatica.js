@@ -18,7 +18,7 @@ function ActivateMonacoEditor(sourceTextEdit) {
     require(['vs/editor/editor.main'], function () {
         px_alls['PanelSource'].hideEnterKey = true; //Enter key won't work in editor without that
 
-        function xhr(url) {
+        function xhr(url, params) {
 			var req = null;
 			return new Promise(function (c, e) {
 				req = new XMLHttpRequest();
@@ -35,10 +35,8 @@ function ActivateMonacoEditor(sourceTextEdit) {
 					}
 				};
 
-				req.open("GET", url, true);
-				req.responseType = "";
-
-				req.send(null);
+                req.open("POST", url, true);
+                req.send(JSON.stringify(params));
 			}, function () {
 				req._canceled = true;
 				req.abort();
@@ -73,9 +71,16 @@ function ActivateMonacoEditor(sourceTextEdit) {
         monaco.languages.registerCompletionItemProvider('csharp', {
             triggerCharacters: ["."],
             provideCompletionItems: function (model, position) {
-                let wordAtPosition = model.getWordAtPosition(position);
+                let word = model.getWordUntilPosition(position);
                 let wordToComplete = "";
-                if (wordAtPosition) wordToComplete = wordAtPosition.word;
+                if (word) wordToComplete = word.word;
+
+                var range = {
+                    startLineNumber: position.lineNumber,
+                    endLineNumber: position.lineNumber,
+                    startColumn: word.startColumn,
+                    endColumn: word.endColumn
+                };
 
                 let params = {
                     "Buffer": model.getValue(),
@@ -101,12 +106,13 @@ function ActivateMonacoEditor(sourceTextEdit) {
                             kind: monaco.languages.CompletionItemKind[response.Kind],
                             documentation: response.Description,
                             insertText: response.CompletionText,
-                            detail: response.ReturnType ? response.ReturnType + " " + response.CompletionText : response.CompletionText
+                            detail: response.ReturnType ? response.ReturnType + " " + response.CompletionText : response.CompletionText,
+                            range: range
                         };
 
                         let array = completions[completion.label];
                         if (!array) {
-                            completions[completion.label] = [completion]
+                            completions[completion.label] = [completion];
                         }
                         else {
                             array.push(completion);
@@ -131,15 +137,17 @@ function ActivateMonacoEditor(sourceTextEdit) {
                         result.push(suggestion);
                     }
 
-                    return result;
+                    return {
+                        suggestions: result
+                    };
                 });
 
-                return [];
+                return null;
             }
         });
 
         monaco.languages.registerSignatureHelpProvider('csharp', {
-            signatureHelpTriggerCharacters: ["("],
+            signatureHelpTriggerCharacters: ["(", ","],
             provideSignatureHelp: function (model, position) {
                 let params = {
                     "Buffer": model.getValue(),
@@ -153,9 +161,9 @@ function ActivateMonacoEditor(sourceTextEdit) {
                     let signatureInfo = JSON.parse(res.responseText);
 
                     let signatureHelp = {
-                        signatures: new Array(signatureInfo.Signatures.length),
                         activeSignature: signatureInfo.ActiveSignature,
-                        activeParameter: signatureInfo.ActiveParameter
+                        activeParameter: signatureInfo.ActiveParameter,
+                        signatures: new Array(signatureInfo.Signatures.length)
                     };
 
                     //TODO: Refactor (case sensitivity?)
@@ -176,10 +184,13 @@ function ActivateMonacoEditor(sourceTextEdit) {
                         };
                     }
 
-                    return signatureHelp;
+                    return {
+                        value: signatureHelp,
+                        dispose: function () { }
+                    };
                 });
 
-                return [];
+                return null;
             }
         });
 
@@ -206,7 +217,7 @@ function ActivateMonacoEditor(sourceTextEdit) {
                     }
                 });
 
-                return [];
+                return null;
             }
         });
         
