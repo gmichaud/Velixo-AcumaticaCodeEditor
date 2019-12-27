@@ -8,7 +8,6 @@
         var projectID = "<%=ProjectID%>";
 	</script>
 
-    <script src="../../Scripts/Monaco/loader.js" type="text/javascript"></script>
     <script src="../../Scripts/Monaco/acumatica.js" type="text/javascript"></script>
 
 	<px:PXFormView runat="server" SkinID="transparent" ID="formTitle" 

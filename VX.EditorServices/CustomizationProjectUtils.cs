@@ -190,7 +190,7 @@ namespace VX.EditorServices
                 new XAttribute("Sdk", "Microsoft.NET.Sdk"),
                 new XElement("PropertyGroup",
                     new XElement("OutputType", "Library"),
-                    new XElement("TargetFramework", "net452")
+                    new XElement("TargetFramework", "net48")
                 ),
                 new XElement("ItemGroup", references.Select(kv =>
                     new XElement("Reference",

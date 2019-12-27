@@ -5,6 +5,8 @@ window.IsEditorActive = false;
 window.ds = null;
 
 function ActivateMonacoEditor(sourceTextEdit) {
+    //debugger;
+
     let ignoreChangeModelContent = false;
 
     if (window.IsEditorActive)
@@ -16,32 +18,32 @@ function ActivateMonacoEditor(sourceTextEdit) {
     require(['vs/editor/editor.main'], function () {
         px_alls['PanelSource'].hideEnterKey = true; //Enter key won't work in editor without that
 
-        function xhr(url, params) {
-            var req = null;
-            return new monaco.Promise(function (c, e, p) {
-                req = new XMLHttpRequest();
-                req.onreadystatechange = function () {
-                    if (req._canceled) { return; }
+        function xhr(url) {
+			var req = null;
+			return new Promise(function (c, e) {
+				req = new XMLHttpRequest();
+				req.onreadystatechange = function () {
+					if (req._canceled) { return; }
 
-                    if (req.readyState === 4) {
-                        if ((req.status >= 200 && req.status < 300) || req.status === 1223) {
-                            c(req);
-                        } else {
-                            e(req);
-                        }
-                        req.onreadystatechange = function () { };
-                    } else {
-                        p(req);
-                    }
-                };
+					if (req.readyState === 4) {
+						if ((req.status >= 200 && req.status < 300) || req.status === 1223) {
+							c(req);
+						} else {
+							e(req);
+						}
+						req.onreadystatechange = function () { };
+					}
+				};
 
-                req.open("POST", url, true);
-                req.send(JSON.stringify(params));
-            }, function () {
-                req._canceled = true;
-                req.abort();
-            });
-        }
+				req.open("GET", url, true);
+				req.responseType = "";
+
+				req.send(null);
+			}, function () {
+				req._canceled = true;
+				req.abort();
+			});
+		}
 
         function extractSummaryText(xmlDocComment) {
             const summaryStartTag = '<summary>';
@@ -207,7 +209,7 @@ function ActivateMonacoEditor(sourceTextEdit) {
                 return [];
             }
         });
-
+        
         editor = monaco.editor.create(document.getElementById('SourcePlaceholder'), {
             value: sourceTextEdit.getValue(),
             language: 'csharp',
