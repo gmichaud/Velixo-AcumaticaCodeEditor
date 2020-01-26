@@ -30,7 +30,7 @@ namespace VX.EditorServices
             Guid workingProject;
             if(!Guid.TryParse(context.Request.Params["p"], out workingProject))
             {
-                throw new Exception("Project Guid invalid or missing.");
+                workingProject = Guid.Empty; //Acumatica Console
             }
 
             var server = ServerManager.Current.GetServer(workingProject);

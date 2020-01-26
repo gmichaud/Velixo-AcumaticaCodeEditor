@@ -71,7 +71,7 @@ namespace VX.EditorServices.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 1.29.0.
+        ///   Looks up a localized string similar to 1.29.1.
         /// </summary>
         internal static string OmniSharpVersion {
             get {

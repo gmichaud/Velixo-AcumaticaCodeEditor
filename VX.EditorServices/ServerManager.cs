@@ -65,9 +65,16 @@ namespace VX.EditorServices
             {
                 string startFolder = String.Empty;
 
-                var custProject = (CustProject)PXSelect<CustProject, Where<CustProject.projID, Equal<Required<CustProject.projID>>>>.Select(new PXGraph(), customizationProjectId);
-                if (custProject == null) throw new Exception($"Customization project {customizationProjectId} not found.");
-                startFolder = CustomizationProjectUtils.GetOmniSharpFilePath(custProject.Name);
+                if (g == Guid.Empty)
+                {
+                    startFolder = CustomizationProjectUtils.GetOmniSharpFilePath("Console");
+                }
+                else
+                {
+                    var custProject = (CustProject)PXSelect<CustProject, Where<CustProject.projID, Equal<Required<CustProject.projID>>>>.Select(new PXGraph(), customizationProjectId);
+                    if (custProject == null) throw new Exception($"Customization project {customizationProjectId} not found.");
+                    startFolder = CustomizationProjectUtils.GetOmniSharpFilePath(custProject.Name);
+                }
 
                 return new StdioServerWrapper(customizationProjectId, startFolder);
             });

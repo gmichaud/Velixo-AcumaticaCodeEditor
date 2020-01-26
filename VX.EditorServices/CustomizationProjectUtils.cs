@@ -26,85 +26,101 @@ namespace VX.EditorServices
 
         internal static void SaveCustomizationFilesToFolder(Guid customizationProjectId, IFileSystemNotifier fileSystemNotifier)
         {
-            string customizationFolder = String.Empty;
-            bool updateProject = false;
-            
-            var custProject = (CustProject)PXSelect<CustProject, Where<CustProject.projID, Equal<Required<CustProject.projID>>>>.Select(new PXGraph(), customizationProjectId);
-            if (custProject == null) throw new Exception($"Customization project {customizationProjectId} not found.");
-
-            customizationFolder = CustomizationProjectUtils.GetOmniSharpFilePath(custProject.Name);
-
-            if (!Directory.Exists(customizationFolder))
+            if (customizationProjectId != Guid.Empty)
             {
-                Directory.CreateDirectory(customizationFolder);
-            }
+                string customizationFolder = String.Empty;
+                bool updateProject = false;
 
-            
-            Dictionary<Guid, CustObjectTimestamp> timestamps;
-            var processedCustObjects = new HashSet<Guid>();
+                var custProject = (CustProject)PXSelect<CustProject, Where<CustProject.projID, Equal<Required<CustProject.projID>>>>.Select(new PXGraph(), customizationProjectId);
+                if (custProject == null) throw new Exception($"Customization project {customizationProjectId} not found.");
 
-            var timestampsFilePath = Path.Combine(customizationFolder, "Timestamp.txt");
-            if (File.Exists(timestampsFilePath))
-            {
-                timestamps = LoadObjectTimestamps(timestampsFilePath);
-            }
-            else
-            {
-                timestamps = new Dictionary<Guid, CustObjectTimestamp>();
-            }
+                customizationFolder = CustomizationProjectUtils.GetOmniSharpFilePath(custProject.Name);
 
-            var persistObjectFromXmlMethod = Type.GetType("Customization.CstDocument, PX.Web.Customization").GetMethod("PersistObjectFromXml");
-            var saveFilesMethod = Type.GetType("Customization.IPersistObject, PX.Web.Customization").GetMethod("SaveFiles");
-            var filesCollectionType = Type.GetType("Customization.FilesCollection, PX.Web.Customization");
-
-            var xmlContents = new XmlDocument();
-            foreach (CustObject custObject in PXSelect<CustObject, Where<CustObject.projectID, Equal<Required<CustObject.projectID>>, And<CustObject.isDisabled, Equal<False>>>>.Select(new PXGraph(), customizationProjectId))
-            {
-                processedCustObjects.Add(custObject.ObjectID.Value);
-
-                CustObjectTimestamp timestamp = null;
-                if (timestamps.TryGetValue(custObject.ObjectID.Value, out timestamp))
+                if (!Directory.Exists(customizationFolder))
                 {
-                    //Existing file - verify if customization object has been updated before we continue
-                    if (timestamp.LastModifiedDateTime == custObject.LastModifiedDateTime.Value)
-                        continue;
+                    Directory.CreateDirectory(customizationFolder);
+                }
+                Dictionary<Guid, CustObjectTimestamp> timestamps;
+                var processedCustObjects = new HashSet<Guid>();
+
+                var timestampsFilePath = Path.Combine(customizationFolder, "Timestamp.txt");
+                if (File.Exists(timestampsFilePath))
+                {
+                    timestamps = LoadObjectTimestamps(timestampsFilePath);
                 }
                 else
                 {
-                    //New file
-                    timestamp = new CustObjectTimestamp();
-                    timestamps[custObject.ObjectID.Value] = timestamp;
+                    timestamps = new Dictionary<Guid, CustObjectTimestamp>();
                 }
 
-                timestamp.LastModifiedDateTime = custObject.LastModifiedDateTime;
+                var persistObjectFromXmlMethod = Type.GetType("Customization.CstDocument, PX.Web.Customization").GetMethod("PersistObjectFromXml");
+                var saveFilesMethod = Type.GetType("Customization.IPersistObject, PX.Web.Customization").GetMethod("SaveFiles");
+                var filesCollectionType = Type.GetType("Customization.FilesCollection, PX.Web.Customization");
 
-                //Deserialize XML to CustObject and generate customization files
-                xmlContents.LoadXml(custObject.Content);
-                var deserializedCustObject = persistObjectFromXmlMethod.Invoke(null, new object[] { (XmlElement)xmlContents.FirstChild });
-                var filesCollection = Activator.CreateInstance(filesCollectionType);
-                saveFilesMethod.Invoke(deserializedCustObject, new object[] { filesCollection });
+                var xmlContents = new XmlDocument();
+                foreach (CustObject custObject in PXSelect<CustObject, Where<CustObject.projectID, Equal<Required<CustObject.projectID>>, And<CustObject.isDisabled, Equal<False>>>>.Select(new PXGraph(), customizationProjectId))
+                {
+                    processedCustObjects.Add(custObject.ObjectID.Value);
 
-                //Save customization files to disk
-                foreach (/*CustomizedFile*/ object file in (IEnumerable<object>)filesCollection.GetType().GetProperty("Files").GetValue(filesCollection))
+                    CustObjectTimestamp timestamp = null;
+                    if (timestamps.TryGetValue(custObject.ObjectID.Value, out timestamp))
+                    {
+                        //Existing file - verify if customization object has been updated before we continue
+                        if (timestamp.LastModifiedDateTime == custObject.LastModifiedDateTime.Value)
+                            continue;
+                    }
+                    else
+                    {
+                        //New file
+                        timestamp = new CustObjectTimestamp();
+                        timestamps[custObject.ObjectID.Value] = timestamp;
+                    }
+
+                    timestamp.LastModifiedDateTime = custObject.LastModifiedDateTime;
+
+                    //Deserialize XML to CustObject and generate customization files
+                    xmlContents.LoadXml(custObject.Content);
+                    var deserializedCustObject = persistObjectFromXmlMethod.Invoke(null, new object[] { (XmlElement)xmlContents.FirstChild });
+                    var filesCollection = Activator.CreateInstance(filesCollectionType);
+                    saveFilesMethod.Invoke(deserializedCustObject, new object[] { filesCollection });
+
+                    //Save customization files to disk
+                    foreach (/*CustomizedFile*/ object file in (IEnumerable<object>)filesCollection.GetType().GetProperty("Files").GetValue(filesCollection))
+                    {
+                        updateProject = true;
+                        var targetPath = SaveCustomizationFile(file, customizationFolder, fileSystemNotifier);
+                        timestamp.Files[targetPath] = true;
+                    }
+                }
+
+                if (CleanupDeletedCustObjects(timestamps, processedCustObjects, fileSystemNotifier))
                 {
                     updateProject = true;
-                    var targetPath = SaveCustomizationFile(file, customizationFolder, fileSystemNotifier);
-                    timestamp.Files[targetPath] = true;
+                }
+
+                SaveObjectTimestamps(timestamps, timestampsFilePath);
+
+                if (updateProject)
+                {
+                    GenerateProjectFile(customizationFolder, fileSystemNotifier);
                 }
             }
-
-            if (CleanupDeletedCustObjects(timestamps, processedCustObjects, fileSystemNotifier))
+            else
             {
-                updateProject = true;
-            }
+                //Hackathon: generate dummy Console.cs file
+                //var customizationFolder = CustomizationProjectUtils.GetOmniSharpFilePath("Console");
 
-            SaveObjectTimestamps(timestamps, timestampsFilePath);
+                //if (!Directory.Exists(customizationFolder))
+                //{
+                //    Directory.CreateDirectory(customizationFolder);
+                //}
 
-            if (updateProject)
-            {
-                GenerateProjectFile(customizationFolder, fileSystemNotifier);
-            }
+                //using (File.Create(Path.Combine(customizationFolder, "Console.cs"))) { }
+                
+                ////Do we need to update it all the time?
+                //GenerateProjectFile(customizationFolder, fileSystemNotifier);
         }
+    }
 
         private static bool CleanupDeletedCustObjects(Dictionary<Guid, CustObjectTimestamp> timestamps, HashSet<Guid> processedCustObjects, IFileSystemNotifier fileSystemNotifier)
         {
@@ -190,7 +206,7 @@ namespace VX.EditorServices
                 new XAttribute("Sdk", "Microsoft.NET.Sdk"),
                 new XElement("PropertyGroup",
                     new XElement("OutputType", "Library"),
-                    new XElement("TargetFramework", "net48")
+                    new XElement("TargetFramework", "net471")
                 ),
                 new XElement("ItemGroup", references.Select(kv =>
                     new XElement("Reference",
