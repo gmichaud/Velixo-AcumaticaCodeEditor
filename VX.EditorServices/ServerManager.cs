@@ -30,7 +30,7 @@ namespace VX.EditorServices
         private ConcurrentDictionary<Guid, StdioServerWrapper> _servers;
 
         private const int ServerStartWaitTimeout = 10;
-        private const int ServerInactivityTimeout = 600;
+        private const int ServerInactivityTimeout = 14400; //For demo, we want it to be fully loaded
 
         public ServerManager()
         {
