@@ -17,6 +17,9 @@ namespace VX.EditorServices
 {
     public static class CustomizationProjectUtils
     {
+        public const string AcuShellOmniSharpProjectName = "Console";
+        public const string AcuShellOmniSharpFileName = "Console.cs";
+
         private const string DateTimeSerializationFormat = "MM/dd/yyyy hh:mm:ss.fff tt";
 
         public static string GetOmniSharpFilePath(string projectName)
@@ -107,20 +110,20 @@ namespace VX.EditorServices
             }
             else
             {
-                //Hackathon: generate dummy Console.cs file
-                //var customizationFolder = CustomizationProjectUtils.GetOmniSharpFilePath("Console");
+                //Hackathon AcuShell: generate dummy Console.cs file
+                var customizationFolder = CustomizationProjectUtils.GetOmniSharpFilePath(AcuShellOmniSharpProjectName);
 
-                //if (!Directory.Exists(customizationFolder))
-                //{
-                //    Directory.CreateDirectory(customizationFolder);
-                //}
+                if (!Directory.Exists(customizationFolder))
+                {
+                    Directory.CreateDirectory(customizationFolder);
+                }
 
-                //using (File.Create(Path.Combine(customizationFolder, "Console.cs"))) { }
-                
-                ////Do we need to update it all the time?
-                //GenerateProjectFile(customizationFolder, fileSystemNotifier);
+                using (File.Create(Path.Combine(customizationFolder, AcuShellOmniSharpFileName))) { }
+
+                //Do we need to update it all the time?
+                GenerateProjectFile(customizationFolder, fileSystemNotifier);
+            }
         }
-    }
 
         private static bool CleanupDeletedCustObjects(Dictionary<Guid, CustObjectTimestamp> timestamps, HashSet<Guid> processedCustObjects, IFileSystemNotifier fileSystemNotifier)
         {
@@ -206,7 +209,7 @@ namespace VX.EditorServices
                 new XAttribute("Sdk", "Microsoft.NET.Sdk"),
                 new XElement("PropertyGroup",
                     new XElement("OutputType", "Library"),
-                    new XElement("TargetFramework", "net471")
+                    new XElement("TargetFramework", "net48")
                 ),
                 new XElement("ItemGroup", references.Select(kv =>
                     new XElement("Reference",

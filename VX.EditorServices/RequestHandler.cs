@@ -27,10 +27,12 @@ namespace VX.EditorServices
 
         public override async Task ProcessRequestAsync(HttpContext context)
         {
+            bool isAcuShell = false;
             Guid workingProject;
             if(!Guid.TryParse(context.Request.Params["p"], out workingProject))
             {
                 workingProject = Guid.Empty; //Acumatica Console
+                isAcuShell = true;
             }
 
             var server = ServerManager.Current.GetServer(workingProject);
@@ -40,8 +42,14 @@ namespace VX.EditorServices
             requestPacket.Command = "/" + context.Request.Params["c"];
             using (var sr = new StreamReader(context.Request.InputStream))
             {
-                var json = await sr.ReadToEndAsync();
-                requestPacket.Arguments = JObject.Parse(json);
+                var parsedJson = JObject.Parse(await sr.ReadToEndAsync());
+    
+                if (isAcuShell)
+                {
+                    ProcessRequestForAcuShell(parsedJson);
+                }
+
+                requestPacket.Arguments = parsedJson;
             }
             
             var responsePacket = await server.SendRequestAndWaitForResponseAsync(requestPacket, TimeSpan.FromSeconds(ResponseWaitTimeout));
@@ -66,6 +74,47 @@ namespace VX.EditorServices
             context.Response.Flush();
             context.Response.Close();
             context.Response.End();
+        }
+
+        private void ProcessRequestForAcuShell(JObject parsedJson)
+        {
+            parsedJson["FileName"] = Path.Combine(CustomizationProjectUtils.GetOmniSharpFilePath(CustomizationProjectUtils.AcuShellOmniSharpProjectName), CustomizationProjectUtils.AcuShellOmniSharpFileName);
+            var template = @"using System;
+                using System.Collections;
+                using System.Collections.Generic;
+                using System.Linq;
+                using PX.Data;
+                using PX.Common;
+                using PX.Objects.GL;
+                using PX.Objects.CM;
+                using PX.Objects.CS;
+                using PX.Objects.CR;
+                using PX.Objects.TX;
+                using PX.Objects.IN;
+                using PX.Objects.EP;
+                using PX.Objects.AP;
+                using PX.TM;
+                using PX.Objects;
+                using PX.Objects.PO;
+                using PX.Objects.SO;
+
+                namespace PX.Objects
+                {
+                    public class Console
+                    {
+                        public void Method()
+                        {
+                            var Graph = new {GraphType}();
+{Buffer} //Do not intend, and adjust line number in the request if this is moved.
+                        }
+                    }
+                }";
+
+            template = template.Replace("{GraphType}", (string) parsedJson["GraphType"]);
+            template = template.Replace("{Buffer}", (string) parsedJson["Buffer"]);
+
+            parsedJson["Buffer"] = template;
+            parsedJson["Line"] = 27; 
         }
     }
 }

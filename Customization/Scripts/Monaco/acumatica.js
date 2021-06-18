@@ -5,8 +5,6 @@ window.IsEditorActive = false;
 window.ds = null;
 
 function ActivateMonacoEditor(sourceTextEdit) {
-    //debugger;
-
     let ignoreChangeModelContent = false;
 
     if (window.IsEditorActive)
