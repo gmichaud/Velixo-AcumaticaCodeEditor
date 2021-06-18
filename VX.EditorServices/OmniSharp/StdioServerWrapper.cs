@@ -71,6 +71,7 @@ namespace VX.EditorServices.OmniSharp
                 }
                 catch(System.InvalidOperationException)
                 {
+                    _process = null; 
                     return false; //Will happen if Start has failed
                 }
             }
